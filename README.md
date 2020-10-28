@@ -1,1 +1,1 @@
-# html-css-javascript examples
+# html-css-javascript projects
