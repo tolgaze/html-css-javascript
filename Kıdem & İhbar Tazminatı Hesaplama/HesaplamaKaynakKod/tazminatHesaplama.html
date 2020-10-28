@@ -1,0 +1,222 @@
+<html lang="tr">  
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <script type="text/javascript" src="tazminatHesapla.js"></script>
+        <style>
+            * {
+                font-family: 'helvetica'
+            }
+            
+            form{
+                background-color: #E0E0E0;
+                border: 1px solid #dddddd;
+                padding-top: 1em;
+            }
+            
+            .container {
+                display: grid;
+                
+            }
+            
+            .subDiv {
+                display: grid;
+                width: 75%;
+                margin: auto;
+            }
+            
+            .mainResultDiv {
+                display: none;
+                width: 50%;
+                height: 70px;
+                margin: auto;
+                margin-top: 2em;
+                border: 1px solid #dddddd;
+                background-color: #00B1AB;
+                border-radius: 24px;
+                border: none;
+                color: white;
+
+            }
+            
+            @media (min-width: 600px) {
+                .container { grid-template-columns: repeat(2, 1fr); }
+                .buttonDiv { width: 88%; }
+            }
+            
+            @media (max-width: 600px) {
+                .buttonDiv { width: 75%; }
+            }
+            
+            .input {
+                margin-bottom: 1em;
+                height: 28px;
+                border-radius: 12px;
+                border: none;
+                outline: none;
+                text-indent: 5px;
+            }
+            
+            .input:focus{
+                box-shadow: 0 0 2pt 2pt darkorange;
+            }
+            
+            
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+              -webkit-appearance: none;
+              margin: 0;
+            }
+
+            /* Firefox */
+            input[type=number] {
+              -moz-appearance: textfield;
+            }
+            
+            .title {
+                margin-bottom: 0.3em; 
+                color: black;
+                font-size: 15;
+            }
+            
+            .mainResultTitle {
+                margin-top: 0.6em;
+                font-size: 15
+            }
+            
+
+            .mainResult {
+                font-size: 25;
+                
+            }
+            
+            .buttonDiv {
+                width: 160px;
+                margin: auto;
+                margin-bottom: 1em;
+                margin-top: 1em;
+            }
+            
+            .button {
+                width: 160px;
+                height: 40px;
+                font-size: 20px;
+                background-color: darkorange;
+                color:white;
+                border-radius: 12px;
+                border: none;
+                outline: none;
+            }
+            
+            .button:active {
+                  background: darkorange;
+            }
+            
+            button:hover {
+                background-color: orange;
+            }
+            
+            .outputTable {
+                margin-top: 1.5em;
+                border-collapse: collapse;
+                width: 100%;  
+                border: 2px solid #00B1AB;
+            }
+
+            .outputTable td {
+              border: 1px solid #00B1AB;
+              text-align: left;
+              padding: 8px;
+              font-size: 15px;
+              width: 70%;
+            }
+            
+            .outputTable th {
+                background-color: #00B1AB;
+                border: 1px solid #ffffff;
+                text-align: left;
+                padding: 8px;
+                color: white;
+                font-size: 15px;
+            }
+            
+        </style>
+    </head>
+    <body> 
+        <form>
+            <div class="container">
+                <div class="subDiv">
+                    <label class="title">İşe Başlama Tarihi</label>
+                    <input class="input"  type="text" id="iseBaslamaTarihi" onkeyup="dateOnKeyUp(this)" onchange="dateOnChange(this)" placeholder="gg/aa/yyyy" maxlength="10"></input>
+                    <label class="title">İşten Ayrılma Tarihi</label>
+                    <input class="input" type="text" id="istenAyrilmaTarihi" onkeyup="dateOnKeyUp(this)" onchange="dateOnChange(this)" placeholder="gg/aa/yyyy" maxlength="10"></input>
+                    <label class="title">Son Brüt Maaş</label>
+                    <input placeholder="Zorunlu" class="input" type="number" id="brutMaas" maxlength = "6" oninput="setTwoNumberDecimal(this)" ></input>
+                </div>
+                <div class="subDiv">
+                    <label class="title">Yıllık Brüt İkramiye</label>
+                    <input class="input" type="number" id="ikramiye" maxlength = "6" placeholder="İsteğe bağlı" oninput="setTwoNumberDecimal(this)" ></input>
+                    <label class="title">Aylık Brüt Ek Yardım</label>
+                    <input class="input" placeholder="Toplam yol, yemek vs." type="number" id="ekUcret" maxlength = "6" oninput="setTwoNumberDecimal(this)" ></input>
+                    <label class="title">Kümülatif Vergi Matrahı</label>
+                    <input class="input" type="number" id="matrah" placeholder="İsteğe bağlı" maxlength = "10" oninput="setTwoNumberDecimal(this)" ></input>
+                </div>
+            </div>
+            <div class="buttonDiv">
+                <button class="button" type="button" onclick="hesapla()">Hesapla</button>
+            </div>
+            <div id="mainResultDivId" hidden="true" style="text-align:center" class="mainResultDiv">
+                <label class="mainResultTitle">Toplam Net Tazminat</label>
+                <label class="mainResult" id="netToplam"></label>
+            </div>
+
+            <table class="outputTable" id="kidemTable" hidden="true">
+              <tr>
+                <th colspan="2">Kıdem Tazminatı</th>
+              </tr>
+              <tr>
+                <td>Kıdem Süresi</th>
+                <td id="kidemSuresi"></td>
+              </tr>
+              <tr>
+                <td>Brüt Kıdem Tazminat Tutarı</th>
+                <td id="brutKidem"></td>
+              </tr>
+              <tr>
+                <td>Damga Vergisi Kesintisi</th>
+                <td id="kidemDamgaVergisi"></td>
+              </tr>
+              <tr>
+                <td>Net Kıdem Tazminatı Tutarı</th>
+                <td id="netKidem"></td>
+              </tr>
+            </table>
+
+            <table class="outputTable" id="ihbarTable" hidden="true">
+              <tr>
+                <th colspan="2">İhbar Tazminatı</th>
+              </tr>
+              <tr>
+                <td>İhbar Süresi</th>
+                <td id="ihbarSuresi"></td>
+              </tr>
+              <tr>
+                <td>Brüt İhbar Tazminat Tutarı</th>
+                <td id="brutIhbar"></td>
+              </tr>
+              <tr>
+                <td>Gelir Vergisi Kesintisi</th>
+                <td id="ihbarGelirVergisi"></td>
+              </tr>
+              <tr>
+                <td>Damga Vergisi Kesintisi</th>
+                <td id="ihbarDamgaVergisi"></td>
+              </tr>
+              <tr>
+                <td>Net İhbar Tazminatı Tutarı</th>
+                <td id="netIhbar"></td>
+              </tr>
+            </table>
+
+        </form>
+    </body> 
+</html> 
